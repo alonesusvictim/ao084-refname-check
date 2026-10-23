@@ -1,0 +1,47 @@
+name: Delete serverless directory in backports
+
+on:
+  pull_request:
+    branches:
+      - '7.*'
+      - '8.*'
+
+jobs:
+  check-and-delete-serverless:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Check for existence of docs/serverless directory
+      id: check_serverless
+      run: |
+        if [ -d "docs/serverless" ]; then
+          echo "SERVERLESS_EXISTS=true" >> $GITHUB_ENV
+        else
+          echo "SERVERLESS_EXISTS=false" >> $GITHUB_ENV
+        fi
+    - name: Delete docs/serverless directory if it exists
+      if: env.SERVERLESS_EXISTS == 'true'
+      run: |
+        rm -rf docs/serverless
+        git config pull.rebase true
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add .
+        git commit -m "Delete docs/serverless directory and its contents"
+        git pull origin ${{ github.head_ref }}
+        git push origin HEAD:${{ github.head_ref }}
+
+    - name: LAB ONLY - marker check (not part of the vendored workflow)
+      if: always()
+      run: |
+        echo "--- added by the lab; lines 1-35 above are Elastic's, byte for byte ---"
+        if [ -e PWNED ]; then
+          echo "RESULT=EXECUTED  the branch name broke out and ran a command"
+          ls -l PWNED; cat PWNED 2>/dev/null | head -2
+        else
+          echo "RESULT=SAFE  no command ran"
+        fi
+        echo "head_ref as the workflow saw it: [${{ github.head_ref }}]"
