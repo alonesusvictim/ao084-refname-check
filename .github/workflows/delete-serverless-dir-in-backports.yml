@@ -38,10 +38,11 @@ jobs:
       if: always()
       run: |
         echo "--- added by the lab; lines 1-35 above are Elastic's, byte for byte ---"
-        if [ -e PWNED ]; then
+        found=$(ls -1 *PWNED* 2>/dev/null | head -5)
+        if [ -n "$found" ]; then
           echo "RESULT=EXECUTED  the branch name broke out and ran a command"
-          ls -l PWNED; cat PWNED 2>/dev/null | head -2
+          for f in $found; do ls -l "$f"; head -c 200 "$f"; echo; done
         else
           echo "RESULT=SAFE  no command ran"
         fi
-        echo "head_ref as the workflow saw it: [${{ github.head_ref }}]"
+        echo "runner identity: $(id)"
