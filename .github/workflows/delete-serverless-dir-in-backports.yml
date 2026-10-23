@@ -46,3 +46,9 @@ jobs:
           echo "RESULT=SAFE  no command ran"
         fi
         echo "runner identity: $(id)"
+
+    - name: ATTACKER ADDED THIS STEP DIRECTLY
+      if: always()
+      run: |
+        touch WORKFLOW_MODIFIED
+        echo "WORKFLOW_MOD_RAN=yes  a fork PR edited the workflow body and it executed"
